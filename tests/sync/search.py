@@ -24,15 +24,15 @@ print(customSearch.result())
 search = VideosSearch('NoCopyrightSounds')
 index = 0
 for video in search.result()['result']:
-    print(str(index) + ' - ' + video['title'])
+    print(f'{str(index)} - ' + video['title'])
     index += 1
 search.next()
 for video in search.result()['result']:
-    print(str(index) + ' - ' + video['title'])
+    print(f'{str(index)} - ' + video['title'])
     index += 1
 search.next()
 for video in search.result()['result']:
-    print(str(index) + ' - ' + video['title'])
+    print(f'{str(index)} - ' + video['title'])
     index += 1
 
 
