@@ -38,10 +38,12 @@ class RequestHandler(ComponentHandler):
     
     def _parseSource(self) -> None:
         try:
-            if not self.continuationKey:
-                responseContent = self._getValue(json.loads(self.response), contentPath)
-            else:
-                responseContent = self._getValue(json.loads(self.response), continuationContentPath)
+            responseContent = (
+                self._getValue(json.loads(self.response), continuationContentPath)
+                if self.continuationKey
+                else self._getValue(json.loads(self.response), contentPath)
+            )
+
             if responseContent:
                 for element in responseContent:
                     if itemSectionKey in element.keys():

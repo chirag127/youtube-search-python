@@ -53,7 +53,7 @@ class ChannelCore(RequestCore):
             thumbnails.extend(getValue(response, ["microformat", "microformatDataRenderer", "thumbnail", "thumbnails"]))
         except:
             pass
-        
+
         tabData: dict = {}
         playlists: list = []
 

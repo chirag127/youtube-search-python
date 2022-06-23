@@ -72,17 +72,17 @@ Generally you'll get maximum of 20 videos in one search, for getting subsequent 
 search = VideosSearch('NoCopyrightSounds')
 index = 0
 for video in search.result()['result']:
-    print(str(index) + ' - ' + video['title'])
+    print(f'{str(index)} - ' + video['title'])
     index += 1
 '''Getting result on 2nd page.'''
 search.next()
 for video in search.result()['result']:
-    print(str(index) + ' - ' + video['title'])
+    print(f'{str(index)} - ' + video['title'])
     index += 1
 '''Getting result on 3rd page.'''
 search.next()
 for video in search.result()['result']:
-    print(str(index) + ' - ' + video['title'])
+    print(f'{str(index)} - ' + video['title'])
     index += 1
 
 

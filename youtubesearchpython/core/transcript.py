@@ -73,8 +73,23 @@ class TranscriptCore(RequestCore):
                 "startTime": getValue(segment, ["startTimeText", "simpleText"])
             }
             segments.append(j)
-        langs = getValue(response, ["actions", 0, "updateEngagementPanelAction", "content", "transcriptRenderer", "content", "transcriptSearchPanelRenderer", "footer", "transcriptFooterRenderer", "languageMenu", "sortFilterSubMenuRenderer", "subMenuItems"])
-        if langs:
+        if langs := getValue(
+            response,
+            [
+                "actions",
+                0,
+                "updateEngagementPanelAction",
+                "content",
+                "transcriptRenderer",
+                "content",
+                "transcriptSearchPanelRenderer",
+                "footer",
+                "transcriptFooterRenderer",
+                "languageMenu",
+                "sortFilterSubMenuRenderer",
+                "subMenuItems",
+            ],
+        ):
             for language in langs:
                 j = {
                     "params": getValue(language, ["continuation", "reloadContinuationData", "continuation"]),
@@ -91,8 +106,7 @@ class TranscriptCore(RequestCore):
         if not self.key:
             self.prepare_params_request()
             r = await self.asyncPostRequest()
-            end = self.extract_continuation_key(r)
-            if end:
+            if end := self.extract_continuation_key(r):
                 return
         self.prepare_transcript_request()
         self.data = await self.asyncPostRequest()
@@ -102,8 +116,7 @@ class TranscriptCore(RequestCore):
         if not self.key:
             self.prepare_params_request()
             r = self.syncPostRequest()
-            end = self.extract_continuation_key(r)
-            if end:
+            if end := self.extract_continuation_key(r):
                 return
         self.prepare_transcript_request()
         self.data = self.syncPostRequest()
