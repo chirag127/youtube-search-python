@@ -20,25 +20,39 @@ class LegacyComponentHandler(RequestHandler, ComponentHandler):
         video = element[videoElementKey]
         videoId = self.__getValue(video, ['videoId'])
         viewCount = 0
-        thumbnails = []
         for character in self.__getValue(video, ['viewCountText', 'simpleText']):
             if character.isnumeric():
                 viewCount = viewCount * 10 + int(character)
         modes = ['default', 'hqdefault', 'mqdefault', 'sddefault', 'maxresdefault']
-        for mode in modes:
-            thumbnails.append('https://img.youtube.com/vi/' + videoId + '/' + mode + '.jpg')
+        thumbnails = [
+            f'https://img.youtube.com/vi/{videoId}/{mode}.jpg' for mode in modes
+        ]
+
         component = {
-            'index':                          self.index,
-            'id':                             videoId,
-            'link':                           'https://www.youtube.com/watch?v=' + videoId,
-            'title':                          self.__getValue(video, ['title', 'runs', 0, 'text']),
-            'channel':                        self.__getValue(video, ['ownerText', 'runs', 0, 'text']),
-            'duration':                       self.__getValue(video, ['lengthText', 'simpleText']),
-            'views':                          viewCount,
-            'thumbnails':                     thumbnails,
-            'channeId':                       self.__getValue(video, ['ownerText', 'runs', 0, 'navigationEndpoint', 'browseEndpoint', 'browseId']), 
-            'publishTime':                    self.__getValue(video, ['publishedTimeText', 'simpleText']),
+            'index': self.index,
+            'id': videoId,
+            'link': f'https://www.youtube.com/watch?v={videoId}',
+            'title': self.__getValue(video, ['title', 'runs', 0, 'text']),
+            'channel': self.__getValue(video, ['ownerText', 'runs', 0, 'text']),
+            'duration': self.__getValue(video, ['lengthText', 'simpleText']),
+            'views': viewCount,
+            'thumbnails': thumbnails,
+            'channeId': self.__getValue(
+                video,
+                [
+                    'ownerText',
+                    'runs',
+                    0,
+                    'navigationEndpoint',
+                    'browseEndpoint',
+                    'browseId',
+                ],
+            ),
+            'publishTime': self.__getValue(
+                video, ['publishedTimeText', 'simpleText']
+            ),
         }
+
         self.index += 1
         return component
     
@@ -47,19 +61,24 @@ class LegacyComponentHandler(RequestHandler, ComponentHandler):
         playlist = element[playlistElementKey]
         playlistId = self.__getValue(playlist, ['playlistId'])
         thumbnailVideoId = self.__getValue(playlist, ['navigationEndpoint', 'watchEndpoint', 'videoId'])
-        thumbnails = []
         modes = ['default', 'hqdefault', 'mqdefault', 'sddefault', 'maxresdefault']
-        for mode in modes:
-            thumbnails.append('https://img.youtube.com/vi/' + thumbnailVideoId + '/' + mode + '.jpg')
+        thumbnails = [
+            f'https://img.youtube.com/vi/{thumbnailVideoId}/{mode}.jpg'
+            for mode in modes
+        ]
+
         component = {
-            'index':                          self.index,
-            'id':                             playlistId,
-            'link':                           'https://www.youtube.com/playlist?list=' + playlistId,
-            'title':                          self.__getValue(playlist, ['title', 'simpleText']),
-            'thumbnails':                     thumbnails,
-            'count':                          self.__getValue(playlist, ['videoCount']),
-            'channel':                        self.__getValue(playlist, ['shortBylineText', 'runs', 0, 'text']),
+            'index': self.index,
+            'id': playlistId,
+            'link': f'https://www.youtube.com/playlist?list={playlistId}',
+            'title': self.__getValue(playlist, ['title', 'simpleText']),
+            'thumbnails': thumbnails,
+            'count': self.__getValue(playlist, ['videoCount']),
+            'channel': self.__getValue(
+                playlist, ['shortBylineText', 'runs', 0, 'text']
+            ),
         }
+
         self.index += 1
         return component
 
@@ -111,19 +130,16 @@ class LegacySearchInternal(LegacyComponentHandler):
         '''
         if self.exception or len(self.resultComponents) == 0:
             return None
-        else:
-            if self.mode == 'dict':
-                return {'search_result': self.resultComponents}
-            elif self.mode == 'json':
-                return json.dumps({'search_result': self.resultComponents}, indent = 4)
-            elif self.mode == 'list':
-                result = []
-                for component in self.resultComponents:
-                    listComponent = []
-                    for key in component.keys():
-                        listComponent.append(component[key])
-                    result.append(listComponent)
-                return result
+        if self.mode == 'dict':
+            return {'search_result': self.resultComponents}
+        elif self.mode == 'json':
+            return json.dumps({'search_result': self.resultComponents}, indent = 4)
+        elif self.mode == 'list':
+            result = []
+            for component in self.resultComponents:
+                listComponent = [component[key] for key in component.keys()]
+                result.append(listComponent)
+            return result
 
 
 class SearchVideos(LegacySearchInternal):
@@ -180,8 +196,13 @@ class SearchVideos(LegacySearchInternal):
             if videoElementKey in element.keys():
                 self.resultComponents.append(self._getVideoComponent(element))
             if shelfElementKey in element.keys():
-                for shelfElement in self._getShelfComponent(element)['elements']:
-                    self.resultComponents.append(self._getVideoComponent(shelfElement))
+                self.resultComponents.extend(
+                    self._getVideoComponent(shelfElement)
+                    for shelfElement in self._getShelfComponent(element)[
+                        'elements'
+                    ]
+                )
+
             if len(self.resultComponents) >= self.limit:
                 break
 

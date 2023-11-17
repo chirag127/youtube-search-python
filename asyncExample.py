@@ -218,7 +218,7 @@ async def main():
     print("Found all comments")
 
 
-    
+
     print(await Transcript.get("https://www.youtube.com/watch?v=L7kF4MXXCoA"))
 
 

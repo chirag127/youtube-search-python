@@ -132,7 +132,7 @@ class VideoCore(RequestCore):
 
     def __getVideoComponent(self, mode: str) -> None:
         videoComponent = {}
-        if mode in ['getInfo', None]:
+        if mode in {'getInfo', None}:
             try:
                 responseSource = self.responseSource
             except:
@@ -166,13 +166,12 @@ class VideoCore(RequestCore):
             component['isLiveNow'] = component['isLiveContent'] and component['duration']['secondsText'] == "0"
             component['link'] = 'https://www.youtube.com/watch?v=' + component['id']
             component['channel']['link'] = 'https://www.youtube.com/channel/' + component['channel']['id']
-            videoComponent.update(component)
-        if mode in ['getFormats', None]:
-            videoComponent.update(
-                {
-                    "streamingData": getValue(self.responseSource, ["streamingData"])
-                }
+            videoComponent |= component
+        if mode in {'getFormats', None}:
+            videoComponent["streamingData"] = getValue(
+                self.responseSource, ["streamingData"]
             )
+
         if self.enableHTML:
             videoComponent["publishDate"] = getValue(self.HTMLresponseSource, ['microformat', 'playerMicroformatRenderer', 'publishDate'])
             videoComponent["uploadDate"] = getValue(self.HTMLresponseSource, ['microformat', 'playerMicroformatRenderer', 'uploadDate'])

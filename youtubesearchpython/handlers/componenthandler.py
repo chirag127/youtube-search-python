@@ -104,7 +104,7 @@ class ComponentHandler:
                 continue
             else:
                 raise Exception(f'Unexpected element {element}')
-            
+
             if responsetype == "video":
                 json = {
                     "id":                                    self._getValue(element, ["videoId"]),

@@ -86,7 +86,7 @@ class PlaylistCore(RequestCore):
         self.url.strip('/')
 
         id = re.search(r"(?<=list=)([a-zA-Z0-9+/=_-]+)", self.url).group()
-        browseId = "VL" + id if not id.startswith("VL") else id
+        browseId = id if id.startswith("VL") else f"VL{id}"
 
         self.url = 'https://www.youtube.com/youtubei/v1/browse' + '?' + urlencode({
             'key': searchKey,
@@ -94,7 +94,7 @@ class PlaylistCore(RequestCore):
         self.data = {
             "browseId": browseId,
         }
-        self.data.update(copy.deepcopy(requestPayload))
+        self.data |= copy.deepcopy(requestPayload)
 
     def __makeRequest(self) -> int:
         self.prepare_first_request()
@@ -230,7 +230,7 @@ class PlaylistCore(RequestCore):
 
     def __getPlaylistComponent(self, element: dict, mode: str) -> dict:
         playlistComponent = {}
-        if mode in ['getInfo', None]:
+        if mode in {'getInfo', None}:
             for infoElement in element['info']:
                 if playlistPrimaryInfoKey in infoElement.keys():
                     component = {
@@ -250,7 +250,7 @@ class PlaylistCore(RequestCore):
                                                                    'playlistCustomThumbnailRenderer', 'thumbnail',
                                                                    'thumbnails']),
                     component['link'] = 'https://www.youtube.com/playlist?list=' + component['id']
-                    playlistComponent.update(component)
+                    playlistComponent |= component
                 if playlistSecondaryInfoKey in infoElement.keys():
                     component = {
                         'channel': {
@@ -268,7 +268,7 @@ class PlaylistCore(RequestCore):
                     }
                     component['channel']['link'] = 'https://www.youtube.com/channel/' + component['channel']['id']
                     playlistComponent.update(component)
-        if mode in ['getVideos', None]:
+        if mode in {'getVideos', None}:
             self.continuationKey = None
             playlistComponent['videos'] = []
             for videoElement in element['videos']:
@@ -351,7 +351,4 @@ class PlaylistCore(RequestCore):
 
     def __getFirstValue(self, source: dict, path: Iterable[str]) -> Union[str, int, dict, list, None]:
         values = self.__getValueEx(source, list(path))
-        for val in values:
-            if val is not None:
-                return val
-        return None
+        return next((val for val in values if val is not None), None)
